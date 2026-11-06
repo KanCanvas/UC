@@ -1,0 +1,78 @@
+{
+  "language": [
+    {
+      "meaning": "const",
+      "pattern": "^@\\s+(\\w+)\\s*=\\s*(.+)$",
+      "groups": ["name", "value"]
+    },
+    {
+      "meaning": "function",
+      "pattern": "^\\$\\s+(\\w+)\\s+&\\s+\\(\\s*(\\w+)\\s*\\)$",
+      "groups": ["name", "body"]
+    },
+    {
+      "meaning": "call",
+      "pattern": "^%\\s+(\\w+)$",
+      "groups": ["name"]
+    },
+    {
+      "meaning": "add",
+      "pattern": "^(.+)\\s*\\+\\s*(.+)$",
+      "groups": ["left", "right"]
+    },
+    {
+      "meaning": "name",
+      "pattern": "^([A-Za-z_]\\w*)$",
+      "groups": ["name"]
+    },
+    {
+      "meaning": "window",
+      "pattern": "^(win!)(.+)$",
+      "code": {
+        "code1": "win",
+        "code2": "win!doc!tit",
+        "code3": "win!loc!hr",
+        "code4": "win!loc!min",
+        "code5": "win!loc!sec",
+        "code6": "win!loc!ms",
+        "code7": "win!loc!us",
+        "code8": "win!loc!ns",
+        "code9": "win!loc!ps",
+        "code10": "win!"
+      },
+      "groups": {
+        "code1": "window",
+        "code2": "window.document.title",
+        "code3": "window.location.href",
+        "code4": "window.location.hostname",
+        "code5": "window.location.pathname",
+        "code6": "window.location.port",
+        "code7": "window.location.protocol",
+        "code8": "window.location.search",
+        "code9": "window.location.hash",
+        "code10": "window."
+      }
+    },
+    {
+        "meaning": "map",
+        "pattern": "^([%&] nap\\{)(\\([^)]*\\)\\s*=>\\s*\\{[\\s\\S]*\\})(\\})$",
+        "patternCallback": "^(\\()([^)]*)(\\)\\s*=>\\s*\\{)([\\s\\S]*)(\\})\\s*$",
+        "code": "% nap{",
+        "codeEnd": "}",
+        "callback": "(name) => {}",
+        "groups": ["code", "callback", "codeEnd"],
+        "maps": {
+            "code1": "map(",
+            "code2": "(name) => {}",
+            "code3": ")"
+        }
+    }
+  ],
+  "source": [
+    "@ total = 100 + 100",
+    "$ ZIC & ( total )",
+    "@ ZIS = % ZIC",
+    "win!doc!tit",
+    "win!% nap{(names) => {win!& nap{(name) => {@ tota = 100  @ fol = 100 }}}}"
+  ]
+}
