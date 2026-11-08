@@ -1,6 +1,6 @@
 import UC, { semantics } from "./compilerUC.js";
 
-const source = "@ total = 100 + 200*200 - 100/10";
+const source = "& hello { world } { world!hello }";
 
 const result = UC.match(source, "Program");
 
