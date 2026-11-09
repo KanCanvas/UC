@@ -2,7 +2,7 @@ import * as ohm from "ohm-js";
 
 const UC = ohm.grammar(String.raw`
   UC {
-    Program = Declaration | DeclarationFunction | Object
+    Program = Declaration | DeclarationFunction | Object | CallFunction | FunctionCallMap | CallBackFunction
 
     Declaration = "@" Identifier "=" Expression
 
@@ -30,10 +30,36 @@ const UC = ohm.grammar(String.raw`
 
     Body = Program*
 
-    ObjectName = letter (letter | digit)*
+    CallFunction = "%" Identifier "{" Arguments "}"
+
+    ObjectName = ObjectWindow
+           | NormalObjectName
+           | FunctionCallMap
+           | CallFunction
 
     Object = ObjectName ("!" ObjectName)*
+
+    NormalObjectName = letter (letter | digit)*
+
+    ObjectWindow = 
+             "win"
+             | "doc"
+             | "tit"
+             | "hre"
+             | "bod"
+             | "pro"
+             | "loc"
+             | "ref"
+             | "sta"
+             | "hea"
+             | "body"
+             | "html"
+             | "url"
     
+
+    FunctionCallMap = "%" "nap" "{" (DeclarationFunction | CallBackFunction) "}"    
+    
+    CallBackFunction = "&" "{" Arguments "}" "{" Body "}" 
   }
 `);
 
@@ -111,9 +137,7 @@ const semantics = UC.createSemantics().addOperation("toJS", {
   Arguments(first, commas, identifiers) {
     return [
       first.sourceString,
-      ...identifiers.children.map((item) => {
-        item.sourceString
-      })
+      ...identifiers.children.map(item => item.sourceString)
     ].join(", ");
   },
 
@@ -123,8 +147,16 @@ const semantics = UC.createSemantics().addOperation("toJS", {
     })
   },
 
-  ObjectName(value, rest) {
-    return value.sourceString + rest.sourceString;
+  CallFunction(percent, identifier, _open, args, _close) {
+    return `${identifier.sourceString}(${args.sourceString})`;
+  },
+
+  FunctionCallMap(percent, identifier, _open, callback, _close) {
+    return `map(${callback.toJS()})`;
+  },
+
+  CallBackFunction(ampersand, _open, args, _close, _open2, body, _close2) {
+    return `(${args.sourceString}) => {${body.toJS()}}`;
   },
 
   Object(first, separators, names) {
@@ -136,6 +168,35 @@ const semantics = UC.createSemantics().addOperation("toJS", {
   
     return result;
   },
+
+  ObjectName(value) {
+    return value.toJS();
+},
+
+ObjectWindow(value) {
+    const names = {
+        win: "window",
+        doc: "document",
+        tit: "title",
+        hre: "href",
+        bod: "body",
+        pro: "protocol",
+        loc: "location",
+        ref: "referrer",
+        sta: "status",
+        hea: "head",
+        body: "body",
+        html: "html",
+        url: "URL"
+    };
+
+    return names[value.sourceString];
+},
+  
+  NormalObjectName(first, rest) {
+    return first.sourceString + rest.sourceString;
+},
+
 })
 
 export { semantics };
