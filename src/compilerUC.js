@@ -57,7 +57,7 @@ const UC = ohm.grammar(String.raw`
              | "url"
     
 
-    FunctionCallMap = "%" "nap" "{" (DeclarationFunction | CallBackFunction) "}"    
+    FunctionCallMap = "%" ("nap" | "fil" | "fla") "{" (DeclarationFunction | CallBackFunction) "}"    
     
     CallBackFunction = "&" "{" Arguments "}" "{" Body "}" 
   }
