@@ -2,6 +2,8 @@ import * as ohm from "ohm-js";
 
 const UC = ohm.grammar(String.raw`
   UC {
+    Start = Program*
+
     Program = Declaration | DeclarationFunction | Object | CallFunction | FunctionCallMap | CallBackFunction
 
     Declaration = "@" Identifier "=" Expression
@@ -64,6 +66,13 @@ const UC = ohm.grammar(String.raw`
 `);
 
 const semantics = UC.createSemantics().addOperation("toJS", {
+  
+  Start(programs) {
+    return programs.children
+    .map(item => item.toJS())
+    .join("\n");
+  },
+
   Program(item) {
     return item.toJS();
   },

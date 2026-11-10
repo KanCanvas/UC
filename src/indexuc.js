@@ -1,8 +1,16 @@
 import UC, { semantics } from "./compilerUC.js";
 
-const source = "& hello { world } { & time { item } { item!% nap { & { item } { item } } } } @ const = 100";
+const source = `
+& hello { world } { 
+    & time { item } { 
+        item!% nap { & { item } { item } }
+    }
+}
 
-const result = UC.match(source, "Program");
+@ const = 100
+`;
+
+const result = UC.match(source, "Start");
 
 if (result.succeeded()) {
   
