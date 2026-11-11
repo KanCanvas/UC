@@ -2,6 +2,9 @@ import fs from "fs";
 import path from "path";
 import hljs from "highlight.js";
 import UC, { semantics } from "../compilerUC.js";
+import CreateProject from "../CreateReactProject/CreateProject.js";
+import scanProjects from "../ScanReactProject/ScanProject.js";
+import searchSrc from "../ScanReactProject/searchSrc.js";
 
 const supportedLanguages = [
     "javascript",
@@ -24,7 +27,7 @@ const detectLanguage = (content) => {
     }
 }
 
-export default function FileScan(directory) {
+export default async function FileScan(directory) {
     const files = fs.readFileSync(directory);
 
     for ( const file of files ) {
@@ -49,6 +52,23 @@ export default function FileScan(directory) {
                 if(result.succeeded()) {
                     const javascript = semantics(result).toJS();
                     fs.writeFileSync(fullpath, javascript, "utf-8");
+                    const srcUC = fullpath.split(path.sep).find(item => item === "src");
+                    const reactProject = await scanProjects(directory);
+                    const {srcReact, FullPathReact} = await searchSrc(reactProject);
+
+                    if(srcUC === srcReact ) {
+                        console.log("Компилирование файлов...");
+                        const parts = fullpath.split(/[\\/]/);
+
+                        const index = parts.indexOf("src");
+
+                        const results = parts.slice(index + 1).join("/");
+
+                        console.log(results);
+                    } else {
+                        console.log("Создание нового проекта..."s);
+                        CreateProject();
+                    }
                 } else {
                     console.log(result.message);
                 }
