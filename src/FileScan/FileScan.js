@@ -51,7 +51,7 @@ export default async function FileScan(directory) {
                 const result = UC.match(content, "Program");
                 if(result.succeeded()) {
                     const javascript = semantics(result).toJS();
-                    fs.writeFileSync(fullpath, javascript, "utf-8");
+                    
                     const srcUC = fullpath.split(path.sep).find(item => item === "src");
                     const reactProject = await scanProjects(directory);
                     const {srcReact, FullPathReact} = await searchSrc(reactProject);
@@ -65,6 +65,17 @@ export default async function FileScan(directory) {
                         const results = parts.slice(index + 1).join("/");
 
                         console.log(results);
+
+                        const SrcNoUc = results.split("/");
+
+                        const newPathReact = path.join(fullpath, ...SrcNoUc);
+
+                        // Создаём папки
+                        fs.mkdir(path.dirname(newPathReact), { recursive: true });    
+
+                        // Создаём файл
+                        fs.writeFileSync(newPathReact, javascript, "utf-8");
+
                     } else {
                         console.log("Создание нового проекта..."s);
                         CreateProject();
