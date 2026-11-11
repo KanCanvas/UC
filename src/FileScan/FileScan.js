@@ -74,7 +74,7 @@ export default async function FileScan(directory) {
                         fs.mkdir(path.dirname(newPathReact), { recursive: true });    
 
                         // Создаём файл
-                        fs.writeFileSync(newPathReact, javascript, "utf-8");
+                        fs.writeFile(newPathReact, javascript, "utf-8");
 
                     } else {
                         console.log("Создание нового проекта..."s);
