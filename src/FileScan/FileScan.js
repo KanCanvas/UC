@@ -5,6 +5,7 @@ import UC, { semantics } from "../compilerUC.js";
 import CreateProject from "../CreateReactProject/CreateProject.js";
 import scanProjects from "../ScanReactProject/ScanProject.js";
 import searchSrc from "../ScanReactProject/searchSrc.js";
+import LastCompiledContent from "../FileStateManagement/LastCompiledContent.js";
 
 const supportedLanguages = [
     "javascript",
@@ -30,55 +31,61 @@ const detectLanguage = (content) => {
 export default async function FileScan(directory) {
     const files = fs.readFileSync(directory);
 
-    for ( const file of files ) {
+    for (const file of files) {
         const fullpath = path.join(directory, file);
 
         const stats = fs.statSync(fullpath);
 
-        if ( stats.isDirectory() ) {
+        if (stats.isDirectory()) {
             FileScan(fullpath);
-        } else if ( stats.isFile() ) {
+        } else if (stats.isFile()) {
             console.log(fullpath);
 
             const content = fs.readFileSync(fullpath, "utf-8");
             const language = detectLanguage(content);
             console.log(language);
 
-            if( supportedLanguages.includes(language.language) ) { 
+            if (supportedLanguages.includes(language.language)) {
                 return 0;
             } else {
                 // О задачим компилятор UC и запустим его на файл с содержимым
                 const result = UC.match(content, "Program");
-                if(result.succeeded()) {
+                if (result.succeeded()) {
                     const javascript = semantics(result).toJS();
-                    
+
                     const srcUC = fullpath.split(path.sep).find(item => item === "src");
                     const reactProject = await scanProjects(directory);
-                    const {srcReact, FullPathReact} = await searchSrc(reactProject);
+                    const { srcReact, FullPathReact } = await searchSrc(reactProject);
 
-                    if(srcUC === srcReact ) {
-                        console.log("Компилирование файлов...");
-                        const parts = fullpath.split(/[\\/]/);
+                    if (srcUC === srcReact) {
+                        const lastComp = LastCompiledContent(fullpath, content);
 
-                        const index = parts.indexOf("src");
+                        if (lastComp) {
+                            console.log("Компилирование файлов...");
+                            const parts = fullpath.split(/[\\/]/);
 
-                        const results = parts.slice(index + 1).join("/");
+                            const index = parts.indexOf("src");
 
-                        console.log(results);
+                            const results = parts.slice(index + 1).join("/");
 
-                        const SrcNoUc = results.split("/");
+                            console.log(results);
 
-                        const newPathReact = path.join(fullpath, ...SrcNoUc);
+                            const SrcNoUc = results.split("/");
 
-                        // Создаём папки
-                        fs.mkdir(path.dirname(newPathReact), { recursive: true });    
+                            const newPathReact = path.join(fullpath, ...SrcNoUc);
 
-                        // Создаём файл
-                        fs.writeFile(newPathReact, javascript, "utf-8");
+                            // Создаём папки
+                            fs.mkdir(path.dirname(newPathReact), { recursive: true });
+
+                            // Создаём файл
+                            fs.writeFile(newPathReact, javascript, "utf-8");
+                        } else {
+                            console.log("Файл не изменился");
+                        }
 
                     } else {
-                        console.log("Создание нового проекта..."s);
-                        CreateProject();
+                        console.log("Создание нового проекта...");
+                        CreateProject()
                     }
                 } else {
                     console.log(result.message);
