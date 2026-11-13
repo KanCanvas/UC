@@ -19,6 +19,7 @@ const supportedLanguages = [
     "css"
 ];
 
+// Функция определения языка программирования
 const detectLanguage = (content) => {
     const language = hljs.highlightAuto(content);
 
@@ -28,6 +29,7 @@ const detectLanguage = (content) => {
     }
 }
 
+// Функция сканирования папок и файлов (локального языка программирования) для компиляция в проект React
 export default async function FileScan(directory) {
     const files = fs.readFileSync(directory);
 

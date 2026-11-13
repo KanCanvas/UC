@@ -1,5 +1,7 @@
+import CollectionDataFiles from "../CollectionDataFiles/CollectionDataFiles";
 
-
+// Алгоритм обноружения корневой папки
+// в качестве аргемента в функции передаем массив путей к файлам
 export default function DetectionRootFolder(ArrayPath) {
     if (!ArrayPath.length || ArrayPath.some(file => !file)) return [];
     
